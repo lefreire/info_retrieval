@@ -13,7 +13,7 @@ class Indexer:
 	def read_config_file_index(self):
 		logging.info('Lendo arquivo de configuração')
 		config = configparser.ConfigParser()
-		config.read('INDEX.CFG')
+		config.read('config/INDEX.CFG')
 		config.sections()
 		return config['INPUT']['LEIA'], config['OUTPUT']['ESCREVA']
 

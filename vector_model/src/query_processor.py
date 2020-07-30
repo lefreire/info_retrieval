@@ -15,18 +15,18 @@ class QueryProcessor:
 	def read_config_file(self):
 		logging.info('Lendo arquivo de configuração PC.CFG')
 		config = configparser.ConfigParser()
-		config.read('PC.CFG')
+		config.read('config/PC.CFG')
 		config.sections()
 		return config['INPUT']['LEIA'], config['OUTPUT']['CONSULTAS'], config['OUTPUT']['ESPERADOS']
 
-	def tokenize_query(query_text):
+	def tokenize_query(self, query_text):
 		tokenizer = RegexpTokenizer(r'\w+')
 		stop_words = set(stopwords.words('english')) 
 		word_tokens = word_tokenize(query_text) 
 		final_sentence = [w for w in word_tokens if not w in stop_words]
 		return " ".join(tokenizer.tokenize(" ".join(final_sentence).upper()))   
 
-	def define_score(votes):
+	def define_score(self, votes):
 		#2*REW + colleagues + post-doctorate associate + 2* JBW
 		weights = [2,1,1,2]
 		score = 0
@@ -35,7 +35,7 @@ class QueryProcessor:
 				score += votes[i]*weights[i]
 		return score
 
-	def read_xml(xml_name):
+	def read_xml(self, xml_name):
 		logging.info('Lendo arquivo xml de consultas')
 		doc = xml.dom.minidom.parse(xml_name)
 		query_number = doc.getElementsByTagName("QueryNumber")
@@ -50,7 +50,7 @@ class QueryProcessor:
 			docs_results = []
 			for item in rec.getElementsByTagName("Item"):
 				votes = [int(x) for x in item.getAttribute("score")] 
-				score = define_score(votes)
+				score = self.define_score(votes)
 				docs_results.append([int(item.firstChild.nodeValue), score])
 			content['Records'].append(docs_results)
 		return content
@@ -65,10 +65,10 @@ class QueryProcessor:
 			writer.writeheader()
 			for index in range(0, len(content['QueryNumber'])):
 				logging.info('Escrevendo consulta '+str(index+1)+'/'+str(len(content['QueryNumber'])))
-				writer.writerow({'QueryNumber': content['QueryNumber'][index], 'QueryText': content['QueryText'][index].upper()})
+				writer.writerow({'QueryNumber': content['QueryNumber'][index], 'QueryText': self.tokenize_query(content['QueryText'][index])})
 
-	def generate_expected_file(expected_file, xml_name):
-		content = read_xml(xml_name)
+	def generate_expected_file(self, expected_file, xml_name):
+		content = self.read_xml(xml_name)
 
 		with open(expected_file, 'w', newline='') as csvfile:
 			fieldnames = ['QueryNumber', 'DocNumber', 'DocVotes']

@@ -1,6 +1,7 @@
 import configparser
 import csv
 import logging
+from nltk.probability import FreqDist
 from nltk.tokenize import RegexpTokenizer
 import unicodedata
 from xml.dom.minidom import parse
@@ -15,7 +16,7 @@ class ListGenerator:
 	def read_config_file_xml(self):
 	  logging.info('Lendo arquivo de configuração')
 	  config = configparser.ConfigParser()
-	  config.read('GLI.CFG')
+	  config.read('config/GLI.CFG')
 	  config.sections()
 	  return config['INPUT']['LEIA'].split(" "), config['OUTPUT']['ESCREVA']
 
@@ -35,25 +36,27 @@ class ListGenerator:
 	        content['abstract'].append(record.getElementsByTagName("ABSTRACT")[0].firstChild.nodeValue)
 	  return content
 
+	def tokenize_abstract(self, abstract):
+		tokenizer = RegexpTokenizer(r'\w+')
+
+		abstract = unicodedata.normalize('NFD', abstract)
+		abstract = str(abstract.encode('ascii', 'ignore').decode("utf-8"))
+		return tokenizer.tokenize(abstract.upper())
+
 	def get_words_doc(self, xml_content):
-	  xml_content['new_abstract'] = []
-	  words_dict = {}
-	  for index in range(0, len(xml_content['abstract'])):
-	    abstract = unicodedata.normalize('NFD', xml_content['abstract'][index])
-	    abstract = str(abstract.encode('ascii', 'ignore').decode("utf-8"))
-	    tokenizer = RegexpTokenizer(r'\w+')
-	    xml_content['new_abstract'].append(tokenizer.tokenize(abstract.upper()))
-	  for index in range(0, len(xml_content['new_abstract'])):
-	    while '' in xml_content['new_abstract'][index]: xml_content['new_abstract'][index].remove('')
-	  for index in range(0, len(xml_content['new_abstract'])):
-	    for word in xml_content['new_abstract'][index]:
-	      docs_number = []
-	      for next_index in range(index, len(xml_content['new_abstract'])):
-	        while word in xml_content['new_abstract'][next_index]:
-	          docs_number.append(int(xml_content['recordnum'][next_index]))
-	          xml_content['new_abstract'][next_index].remove(word)
-	      words_dict[word] = docs_number   
-	  return words_dict
+		xml_content['new_abstract'] = []
+		words_dict = {}
+
+		for index in range(0, len(xml_content['abstract'])):
+			abstract = self.tokenize_abstract(xml_content['abstract'][index])
+			while '' in abstract: abstract.remove('')
+			fdist = FreqDist(abstract)
+			for word in fdist.keys(): 
+				if word in words_dict:
+					words_dict[word].extend(fdist[word]*[int(xml_content['recordnum'][index])])
+				else:
+					words_dict[word] = fdist[word]*[int(xml_content['recordnum'][index])]
+		return words_dict
 
 	def create_csv_words(self, csv_file, words_content):
 	  with open(csv_file, 'w', newline='') as csvfile:

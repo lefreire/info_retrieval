@@ -8,6 +8,9 @@ from nltk.tokenize import RegexpTokenizer
 class QueriesSearch:
 
 	def __init__(self):
+		"""
+			Constructor
+		"""
 		logging.basicConfig(level=logging.INFO)
 
 	def read_file(self):
@@ -19,11 +22,9 @@ class QueriesSearch:
 
 	def read_csv_input(self, file_path):
 		content = {}
-		# tokenizer = RegexpTokenizer(r'\w+')
 		with open(file_path, newline='') as csvfile:
 			reader = csv.DictReader(csvfile)
 			for row in reader:
-				# content_row = tokenizer.tokenize(row['QueryText'].upper())
 				content[int(row['QueryNumber'])]=row['QueryText']
 		return content
 

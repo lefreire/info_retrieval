@@ -64,7 +64,7 @@ class ListGenerator:
 						content['abstract'].append(" ")    
 				else:
 					content['abstract'].append(record.getElementsByTagName("ABSTRACT")[0].firstChild.nodeValue)
-				count_files += 1
+			count_files += 1
 		logging.info('FINALIZADO: leitura de arquivos xml')
 		return content
 
@@ -105,14 +105,13 @@ class ListGenerator:
 
 		for index in range(0, len(xml_content['abstract'])):
 			abstract = self.tokenize_abstract(xml_content['abstract'][index])
-			while '' in abstract: abstract.remove('')
 			fdist = FreqDist(abstract)
 			for word in fdist.keys(): 
 				if word in words_dict:
 					words_dict[word].extend(fdist[word]*[int(xml_content['recordnum'][index])])
 				else:
 					words_dict[word] = fdist[word]*[int(xml_content['recordnum'][index])]
-		logging.info('FINALIZADO: contagem de ocorrência das palavras nos documentos em '+str(time.time()-start))
+		logging.info('FINALIZADO: contagem de ocorrência das palavras nos documentos em '+str(time.time()-start_time))
 		return words_dict
 
 	def create_csv_words(self, csv_file, words_content):
@@ -134,7 +133,8 @@ class ListGenerator:
 			writer.writeheader()
 			count_words = 1
 			for key in words_content.keys():
-				logging.info('Escrevendo palavra '+str(count_words)+'/'+str(len(words_content)))
+				if count_words%1000 == 0:
+					logging.info('Escrevendo palavra '+str(count_words)+'/'+str(len(words_content)))
 				writer.writerow({'WORD': key, 'DOCS': words_content[key]})
 				count_words += 1
 		logging.info('FINALIZADO: criação de arquivo csv com lista invertida')

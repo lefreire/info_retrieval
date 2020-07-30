@@ -6,44 +6,100 @@ from nltk.tokenize import RegexpTokenizer
 import unicodedata
 from xml.dom.minidom import parse
 import xml.dom.minidom
+import time
 
 
 class ListGenerator:
 
 	def __init__(self):
+		"""
+			Constructor
+		"""
 		logging.basicConfig(level=logging.INFO)
+		logging.info('INICIANDO: MÓDULO GERADOR DE LISTA INVERTIDA')
 
 	def read_config_file_xml(self):
-	  logging.info('Lendo arquivo de configuração')
-	  config = configparser.ConfigParser()
-	  config.read('config/GLI.CFG')
-	  config.sections()
-	  return config['INPUT']['LEIA'].split(" "), config['OUTPUT']['ESCREVA']
+		"""
+			Reading configuration file
+
+			Returns
+			-------
+			path_input_file: list of strings
+			path_output_file: string
+		"""
+		logging.info('INICIANDO: leitura de arquivo de configuração GLI.CFG')
+		config = configparser.ConfigParser()
+		config.read('config/GLI.CFG')
+		config.sections()
+		logging.info('FINALIZADO: leitura de arquivo de configuração GLI.CFG')
+		return config['INPUT']['LEIA'].split(" "), config['OUTPUT']['ESCREVA']
 
 	def read_xml_files(self, xml_files):
-	  content = {'recordnum':[], 'abstract':[]}
-	  for xml_name in xml_files:
-	    doc = xml.dom.minidom.parse(xml_name).documentElement
-	    records = doc.getElementsByTagName("RECORD")
-	    for record in records:
-	      content['recordnum'].append(record.getElementsByTagName("RECORDNUM")[0].firstChild.nodeValue)
-	      if len(record.getElementsByTagName("ABSTRACT")) == 0:
-	        if len(record.getElementsByTagName("EXTRACT")) > 0:
-	          content['abstract'].append(record.getElementsByTagName("EXTRACT")[0].firstChild.nodeValue)
-	        else:
-	          content['abstract'].append(" ")    
-	      else:
-	        content['abstract'].append(record.getElementsByTagName("ABSTRACT")[0].firstChild.nodeValue)
-	  return content
+		"""
+			Reading xml files to get the content in the tags RECORD, RECORDNUM, 
+			ABSTRACT/EXTRACT
+
+			Parameters
+	        ----------
+			xml_files: list with the xml files to read
+
+			Returns
+			-------
+
+			content: dictionary with keys recordnum, abstract
+		"""	
+		logging.info('INICIANDO: leitura de arquivos xml')
+		content = {'recordnum':[], 'abstract':[]}
+		count_files = 1
+		for xml_name in xml_files:
+			logging.info('Lendo arquivo xml '+str(count_files)+'/'+str(len(xml_files)))
+			doc = xml.dom.minidom.parse(xml_name).documentElement
+			records = doc.getElementsByTagName("RECORD")
+			for record in records:
+				content['recordnum'].append(record.getElementsByTagName("RECORDNUM")[0].firstChild.nodeValue)
+				if len(record.getElementsByTagName("ABSTRACT")) == 0:
+					if len(record.getElementsByTagName("EXTRACT")) > 0:
+						content['abstract'].append(record.getElementsByTagName("EXTRACT")[0].firstChild.nodeValue)
+					else:
+						content['abstract'].append(" ")    
+				else:
+					content['abstract'].append(record.getElementsByTagName("ABSTRACT")[0].firstChild.nodeValue)
+				count_files += 1
+		logging.info('FINALIZADO: leitura de arquivos xml')
+		return content
 
 	def tokenize_abstract(self, abstract):
-		tokenizer = RegexpTokenizer(r'\w+')
+		"""
+			Gets a text and remove unwanted characters
 
+			Parameters
+			----------
+			abstract: string
+
+			Returns
+			-------
+			tokenized_abstract: string
+		"""
+		tokenizer = RegexpTokenizer(r'\w+')
 		abstract = unicodedata.normalize('NFD', abstract)
 		abstract = str(abstract.encode('ascii', 'ignore').decode("utf-8"))
 		return tokenizer.tokenize(abstract.upper())
 
 	def get_words_doc(self, xml_content):
+		"""
+			Counts how many times a word appears in the document
+			Each document is represented by recordnum
+
+			Parameters
+			----------
+			xml_content: dictionary with keys recordnum and abstract
+
+			Returns
+			-------
+			words_dict: dictionary with keys = words in the text
+		"""
+		logging.info('INICIANDO: contagem de ocorrência das palavras nos documentos')
+		start_time = time.time()
 		xml_content['new_abstract'] = []
 		words_dict = {}
 
@@ -56,17 +112,41 @@ class ListGenerator:
 					words_dict[word].extend(fdist[word]*[int(xml_content['recordnum'][index])])
 				else:
 					words_dict[word] = fdist[word]*[int(xml_content['recordnum'][index])]
+		logging.info('FINALIZADO: contagem de ocorrência das palavras nos documentos em '+str(time.time()-start))
 		return words_dict
 
 	def create_csv_words(self, csv_file, words_content):
-	  with open(csv_file, 'w', newline='') as csvfile:
-	    writer = csv.DictWriter(csvfile, fieldnames=['WORD', 'DOCS'])
-	    writer.writeheader()
-	    for key in words_content.keys():
-	      writer.writerow({'WORD': key, 'DOCS': words_content[key]})
+		"""
+			Creating csv file in path csv_file with content equals words_content
+
+			Parameters
+			----------
+			csv_file: string
+			words_content: dictionary
+
+			Returns
+			-------
+			csv_file: file with headers [WORD, DOCS]
+		"""
+		logging.info('INICIANDO: criação de arquivo csv com lista invertida')
+		with open(csv_file, 'w', newline='') as csvfile:
+			writer = csv.DictWriter(csvfile, fieldnames=['WORD', 'DOCS'])
+			writer.writeheader()
+			count_words = 1
+			for key in words_content.keys():
+				logging.info('Escrevendo palavra '+str(count_words)+'/'+str(len(words_content)))
+				writer.writerow({'WORD': key, 'DOCS': words_content[key]})
+				count_words += 1
+		logging.info('FINALIZADO: criação de arquivo csv com lista invertida')
 
 	def generate_list(self):
+	  """
+	  	Main method
+	  	Reads all files and generate a list with words 
+	  	and frequency in each document contained in read_files
+	  """
 	  read_files, write_file = self.read_config_file_xml()
 	  content = self.read_xml_files(read_files)
 	  words_content = self.get_words_doc(content)
 	  self.create_csv_words(write_file, words_content)
+	  logging.info('FINALIZADO: MÓDULO GERADOR DE LISTA INVERTIDA')

@@ -1,12 +1,15 @@
 import configparser
 import csv
 import logging
+import nltk
+nltk.download('stopwords')
+nltk.download('punkt')
 from nltk.probability import FreqDist
 from nltk.tokenize import RegexpTokenizer
+import time
 import unicodedata
 from xml.dom.minidom import parse
 import xml.dom.minidom
-import time
 
 
 class ListGenerator:
@@ -70,7 +73,7 @@ class ListGenerator:
 
 	def tokenize_abstract(self, abstract):
 		"""
-			Gets a text and remove unwanted characters
+			Gets a text, remove unwanted characters and stopwords
 
 			Parameters
 			----------
@@ -81,9 +84,12 @@ class ListGenerator:
 			tokenized_abstract: string
 		"""
 		tokenizer = RegexpTokenizer(r'\w+')
+		stop_words = set(stopwords.words('english')) 
+
 		abstract = unicodedata.normalize('NFD', abstract)
 		abstract = str(abstract.encode('ascii', 'ignore').decode("utf-8"))
-		return tokenizer.tokenize(abstract.upper())
+		abstract = tokenizer.tokenize(abstract.upper()) 
+		return [w for w in abstract if not w.lower() in stop_words]
 
 	def get_words_doc(self, xml_content):
 		"""

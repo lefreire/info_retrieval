@@ -42,8 +42,12 @@ class Indexer:
 			------
 			tf_dict: dictionary with tf to each word in each document
 		"""
+		logging.info('INICIANDO: Cálculo de tf dos termos')
 		tf_dict = {}
+		count_words = 1
 		for word in content.keys():
+			if count_words%1000 == 0:
+				logging.info('Calculando tf de termo '+str(count_words)+'/'+str(len(content)))
 			if len(word) > 2 and word.isalpha():
 				tf_dict[word] = {}
 				docs_in = set(content[word])
@@ -52,6 +56,8 @@ class Indexer:
 						tf_dict[word][doc] = 1+np.log2(content[word].count(doc))
 					else: 
 						tf_dict[word][doc] = 0
+			count_words += 1
+		logging.info('FINALIZADO: Cálculo de tf dos termos')
 		return tf_dict
 
 	def calculate_num_docs(self, content):
@@ -87,33 +93,83 @@ class Indexer:
 			------
 			tf_dict: dictionary with idf to each word
 		"""
+		logging.info('INICIANDO: Cálculo de idf dos termos')
 		num_docs = self.calculate_num_docs(content)
 		idf_dict = {}
+		count_words = 1
 		for word in content.keys():
+			if count_words%1000 == 0:
+				logging.info('Calculando idf de termo '+str(count_words)+'/'+str(len(content)))
 			if len(word) > 2 and word.isalpha():
 				docs_in = set(content[word])
 				idf_dict[word] = np.log2(num_docs/len(docs_in))
+			count_words += 1
+		logging.info('FINALIZADO: Cálculo de idf dos termos')
 		return idf_dict
 
 	def calculate_tf_idf(self, tf, idf):
+		"""
+			Calculating tf-idf to each term
+
+			Parameters
+			----------
+			tf: dictionary
+			idf: dictionary
+
+			Returns
+			-------
+			tf_idf_dict: dictionary
+		"""
+		logging.info('INICIANDO: Cálculo de tf-idf dos termos')
 		tf_idf_dict = {}
+		count_words = 1
 		for word in tf:
+			if count_words%1000 == 0:
+				logging.info('Calculando idf de termo '+str(count_words)+'/'+str(len(content)))
 			tf_idf_dict[word] = {}
 			for doc in tf[word]:
 				tf_idf_dict[word][doc] = tf[word][doc]*idf[word]
+			count_words += 1
+		logging.info('FINALIZADO: Cálculo de tf-idf dos termos')
 		return tf_idf_dict
 
 	def read_csv_input(self, file_path):
+		"""
+			Reading csv file with words and documents where each word appears
+
+			Parameters
+			----------
+			file_path: string with csv file path
+
+			Returns
+			-------
+			content: dictionary
+		"""
+		logging.info('INICIANDO: Leitura de arquivo csv com palavras e documentos onde aparece cada palavra')
 		content = {}
 		with open(file_path, newline='') as csvfile:
 			reader = csv.DictReader(csvfile)
 			for row in reader:
 				content[row['WORD']] =json.loads(row['DOCS'])
+		logging.info('FINALIZADO: Leitura de arquivo csv com palavras e documentos onde aparece cada palavra')
 		return content
 
 	def write_output_file(self, file_path, content):
+		"""
+			Writing a json file with the tf-idf correspondent to each term and document
+
+			Parameters
+			----------
+			content: dictionary
+
+			Returns
+			-------
+			json_file
+		"""
+		logging.info('INICIANDO: Escrita de arquivo json com tf-idf')
 		with open(file_path, 'w') as f:
 			json.dump(content, f)
+		logging.info('FINALIZADO: Escrita de arquivo json com tf-idf')
 
 	def index_tf_idf(self):
 		"""

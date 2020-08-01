@@ -32,7 +32,7 @@ class ListGenerator:
 		"""
 		logging.info('INICIANDO: leitura de arquivo de configuração GLI.CFG')
 		config = configparser.ConfigParser()
-		config.read('config/GLI.CFG')
+		config.read('config/gli.cfg')
 		config.sections()
 		logging.info('FINALIZADO: leitura de arquivo de configuração GLI.CFG')
 		return config['INPUT']['LEIA'].split(" "), config['OUTPUT']['ESCREVA']

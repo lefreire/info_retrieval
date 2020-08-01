@@ -27,7 +27,7 @@ class QueriesSearch:
 		"""
 		logging.info('INICIANDO: leitura do arquivo de configuração BUSCA.CFG')
 		config = configparser.ConfigParser()
-		config.read('config/BUSCA.CFG')
+		config.read('config/busca.cfg')
 		config.sections()
 		logging.info('FINALIZADO: leitura do arquivo de configuração BUSCA.CFG')
 		return config['INPUT']['MODELO'], config['INPUT']['CONSULTAS'], config['OUTPUT']['RESULTADOS']

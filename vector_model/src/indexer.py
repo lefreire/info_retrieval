@@ -25,7 +25,7 @@ class Indexer:
 		"""
 		logging.info('INICIANDO: leitura do arquivo de configuração INDEX.CFG')
 		config = configparser.ConfigParser()
-		config.read('config/INDEX.CFG')
+		config.read('config/index.cfg')
 		config.sections()
 		logging.info('FINALIZADO: leitura do arquivo de configuração INDEX.CFG')
 		return config['INPUT']['LEIA'], config['OUTPUT']['ESCREVA']

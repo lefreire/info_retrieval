@@ -29,7 +29,7 @@ class QueryProcessor:
 		"""
 		logging.info('INICIANDO: leitura do arquivo de configuração PC.CFG')
 		config = configparser.ConfigParser()
-		config.read('config/PC.CFG')
+		config.read('config/pc.cfg')
 		config.sections()
 		logging.info('FINALIZADO: leitura de arquivo de configuração PC.CFG')
 		return config['INPUT']['LEIA'], config['OUTPUT']['CONSULTAS'], config['OUTPUT']['ESPERADOS']

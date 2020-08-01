@@ -1,0 +1,11 @@
+O modelo pode ser encontrado no arquivo modelo.json na pasta result. 
+
+Está definido da seguinte forma:
+
+{{PALAVRA: {DOCUMENTO ID: tf_idf}}}
+
+sendo:
+	- PALAVRA todas as palavras que aparecem nos documentos
+	- DOCUMENTO ID: numero do documento, definido nos arquivos xml. Para cada palavra, aparecem apenas os documentos em que as palavras aparecem. Por exemplo, a palavra NOSE aparece nos documentos [29, 58, 250, 626, 733]. Então, teremos:
+	{NOSE: {29: tf_idf_1, 58: tf_idf_2, 250: tf_idf_3, 626: tf_idf_4, 733: tf_idf_5}}
+	- tf_idf: valor do tf-idf para a palavra no documento indicado

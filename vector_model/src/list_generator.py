@@ -4,6 +4,7 @@ import logging
 import nltk
 nltk.download('stopwords')
 nltk.download('punkt')
+from nltk.corpus import stopwords
 from nltk.probability import FreqDist
 from nltk.tokenize import RegexpTokenizer
 import time

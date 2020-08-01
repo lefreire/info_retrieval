@@ -125,7 +125,7 @@ class Indexer:
 		count_words = 1
 		for word in tf:
 			if count_words%1000 == 0:
-				logging.info('Calculando idf de termo '+str(count_words)+'/'+str(len(content)))
+				logging.info('Calculando idf de termo '+str(count_words)+'/'+str(len(tf)))
 			tf_idf_dict[word] = {}
 			for doc in tf[word]:
 				tf_idf_dict[word][doc] = tf[word][doc]*idf[word]

@@ -86,7 +86,6 @@ class QueriesSearch:
 			docs: dictionary
 			docs_power2: dictionary
 		"""
-		#peso da consulta = 1
 		docs_weights = {}
 		query = query.split(" ")
 		for word in content.keys():
@@ -134,17 +133,21 @@ class QueriesSearch:
 		"""
 		logging.info('INICIANDO: cálculo de similaridade entre as consultas e os documentos')
 		res = {}
+		in_ranking = {}
 		start_time = time.time()
 		for query_number in queries.keys():
 			res[query_number] = self.calculate_query_vector_model(content, queries[query_number])
-		logging.info('FINALIZADO: cálculo de similaridade entre as consultas e os documentos em '+str(time.time()-start_time)+'s')
+		logging.info('FINALIZADO: cálculo de similaridade entre as consultas e os documentos em '+str(time.time()-start_time))
 		return res
 
 	def write_results(self, content, output_path):
 		"""
 			Writing results in a csv file
-			Each row in csv file has query number, retrieved document and 
-			their position in the ranking 
+			Each row in csv file has query number, retrieved document, 
+			their position in the ranking and the similarity score between document 
+			and query
+			The results in the file only have similarity score >= 0.55
+
 
 			Parameters
 			----------
@@ -163,7 +166,8 @@ class QueriesSearch:
 			for key in content.keys():
 				logging.info('Escrevendo resultados da consulta '+str(count_queries)+'/'+str(len(content)))
 				for index in range(0, len(content[key])):
-					writer.writerow({'QueryNumber': key, 'RankingDoc': [index+1, content[key][index][0], content[key][index][1]]})
+					if content[key][index][1] >= 0.55 : 
+						writer.writerow({'QueryNumber': key, 'RankingDoc': [index+1, content[key][index][0], content[key][index][1]]})
 				count_queries += 1
 		logging.info('FINALIZADO: escrita dos resultados no arquivo csv')
 
@@ -177,3 +181,4 @@ class QueriesSearch:
 		res = self.calculare_vector_model(content, queries)
 		self.write_results(res, output_path)
 		logging.info('FINALIZADO: MÓDULO BUSCADOR')
+

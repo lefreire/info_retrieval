@@ -18,7 +18,7 @@ Na pasta *src*:
 
 		- modelo.json: contém o modelo vetorial, indicando os pesos de cada palavra em cada documento em que aparecem
 
-		- resultados.csv: contém os documentos recuperados pelo modelo a partir das consultas dadas
+		- resultados.csv: contém os documentos recuperados pelo modelo a partir das consultas dadas, que obtiveram similaridade maior ou igual a 0.55
 
 	- *data*: arquivos de onde serão extraídas as consultas e os documentos para a recuperação
 
@@ -31,6 +31,8 @@ Na pasta *src*:
 5. **queries_search:** recupera os documentos da coleção de acordo com cada consulta processada em *queries_processor.py*
 
 6. **main.py:** executa cada um dos passos da recuperação dos documentos de acordo com as consultas.
+
+Tanto nas consultas, presentes em *consultas.csv*, quanto nas palavras, presentes em *output.csv*, foram retirados os stopwords e caracteres indesejados, como \n, (, ).
 
 ## Execução
 

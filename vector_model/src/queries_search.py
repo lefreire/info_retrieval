@@ -3,6 +3,7 @@ import csv
 import json
 import logging
 from nltk.tokenize import RegexpTokenizer
+from numpy import linalg as LA
 import time
 
 
@@ -86,17 +87,18 @@ class QueriesSearch:
 			docs_power2: dictionary
 		"""
 		#peso da consulta = 1
-		docs = {}
-		docs_power2 = {}
-		for key in content.keys():
-			for doc in content[key]:
-				docs[doc] = docs_power2[doc] = 0
+		docs_weights = {}
+		query = query.split(" ")
 		for word in content.keys():
 			if word in query:
 				for doc in content[word]:
-					docs[doc] += content[word][doc]
-					docs_power2[doc] += content[word][doc]**2
-		return docs, docs_power2
+					if doc in docs_weights.keys():
+						docs_weights[doc].append(content[word][doc])
+					else:
+						docs_weights[doc] = [content[word][doc]]
+		return docs_weights
+
+
 
 	def calculate_query_vector_model(self, content, query):
 		"""
@@ -112,10 +114,9 @@ class QueriesSearch:
 			res: dictionary
 		"""
 		res = {}
-		docs_weight, docs_weight_power2 = self.calculate_doc_weight(content, query)
+		docs_weight = self.calculate_doc_weight(content, query)
 		for doc in docs_weight.keys():
-			if docs_weight[doc] > 0:
-				res[doc] = docs_weight[doc]/(docs_weight_power2[doc]*len(query))
+			res[doc] = sum(docs_weight[doc])/(LA.norm(docs_weight[doc])*LA.norm([1]*len(query.split(" "))))
 		return sorted(res.items(), key=lambda x: x[1], reverse=True)
 
 	def calculare_vector_model(self, content, queries):
@@ -135,8 +136,8 @@ class QueriesSearch:
 		res = {}
 		start_time = time.time()
 		for query_number in queries.keys():
-			res[query_number] = self.calculate_query_vector_model(content, queries[query_number])[:10]
-		logging.info('FINALIZADO: cálculo de similaridade entre as consultas e os documentos em '+str(time.time()-start_time))
+			res[query_number] = self.calculate_query_vector_model(content, queries[query_number])
+		logging.info('FINALIZADO: cálculo de similaridade entre as consultas e os documentos em '+str(time.time()-start_time)+'s')
 		return res
 
 	def write_results(self, content, output_path):
@@ -176,4 +177,3 @@ class QueriesSearch:
 		res = self.calculare_vector_model(content, queries)
 		self.write_results(res, output_path)
 		logging.info('FINALIZADO: MÓDULO BUSCADOR')
-

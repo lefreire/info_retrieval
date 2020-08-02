@@ -118,7 +118,7 @@ class ListGenerator:
 					words_dict[word].extend(fdist[word]*[int(xml_content['recordnum'][index])])
 				else:
 					words_dict[word] = fdist[word]*[int(xml_content['recordnum'][index])]
-		logging.info('FINALIZADO: contagem de ocorrência das palavras nos documentos em '+str(time.time()-start_time))
+		logging.info('FINALIZADO: contagem de ocorrência das palavras nos documentos em '+str(time.time()-start_time)+' s')
 		return words_dict
 
 	def create_csv_words(self, csv_file, words_content):

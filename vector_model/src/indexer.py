@@ -48,7 +48,7 @@ class Indexer:
 		for word in content.keys():
 			if count_words%1000 == 0:
 				logging.info('Calculando tf de termo '+str(count_words)+'/'+str(len(content)))
-			if len(word) > 2 and word.isalpha():
+			if len(word) >= 2 and word.isalpha():
 				tf_dict[word] = {}
 				docs_in = set(content[word])
 				for doc in docs_in:
@@ -100,7 +100,7 @@ class Indexer:
 		for word in content.keys():
 			if count_words%1000 == 0:
 				logging.info('Calculando idf de termo '+str(count_words)+'/'+str(len(content)))
-			if len(word) > 2 and word.isalpha():
+			if len(word) >= 2 and word.isalpha():
 				docs_in = set(content[word])
 				idf_dict[word] = np.log2(num_docs/len(docs_in))
 			count_words += 1
@@ -182,4 +182,3 @@ class Indexer:
 		res = self.calculate_tf_idf(tf, idf)
 		self.write_output_file(output_path, res)
 		logging.info('FINALIZADO: MÓDULO INDEXADOR')
-

@@ -3,9 +3,11 @@ import csv
 import logging
 from xml.dom.minidom import parse
 import xml.dom.minidom
+import nltk
+nltk.download('stopwords')
+nltk.download('punkt')
 from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer, word_tokenize 
-import time
 
 
 class QueryProcessor:
@@ -48,9 +50,9 @@ class QueryProcessor:
 		"""
 		tokenizer = RegexpTokenizer(r'\w+')
 		stop_words = set(stopwords.words('english')) 
-		word_tokens = word_tokenize(query_text) 
-		final_sentence = [w for w in word_tokens if not w in stop_words]
-		return " ".join(tokenizer.tokenize(" ".join(final_sentence).upper()))   
+		abstract = tokenizer.tokenize(query_text.upper()) 
+		final_sentence = [w for w in abstract if not w.lower() in stop_words]
+		return " ".join(final_sentence).upper()
 
 	def define_score(self, votes_string):
 		"""

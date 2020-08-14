@@ -11,6 +11,7 @@ import time
 import unicodedata
 from xml.dom.minidom import parse
 import xml.dom.minidom
+from stemmer import StemmingWords
 
 
 class ListGenerator:
@@ -36,7 +37,7 @@ class ListGenerator:
 		config.read('config/gli.cfg')
 		config.sections()
 		logging.info('FINALIZADO: leitura de arquivo de configuração GLI.CFG')
-		return config['INPUT']['LEIA'].split(" "), config['OUTPUT']['ESCREVA']
+		return config.has_section('STEMMER'), config['INPUT']['LEIA'].split(" "), config['OUTPUT']['ESCREVA']
 
 	def read_xml_files(self, xml_files):
 		"""
@@ -92,7 +93,7 @@ class ListGenerator:
 		abstract = tokenizer.tokenize(abstract.upper()) 
 		return [w for w in abstract if not w.lower() in stop_words]
 
-	def get_words_doc(self, xml_content):
+	def get_words_doc(self, xml_content, apply_stemmer):
 		"""
 			Counts how many times a word appears in the document
 			Each document is represented by recordnum
@@ -112,13 +113,15 @@ class ListGenerator:
 
 		for index in range(0, len(xml_content['abstract'])):
 			abstract = self.tokenize_abstract(xml_content['abstract'][index])
+			if apply_stemmer:
+				 abstract = StemmingWords().stemming_tokens(" ".join(abstract)).split(" ")
 			fdist = FreqDist(abstract)
 			for word in fdist.keys(): 
 				if word in words_dict:
 					words_dict[word].extend(fdist[word]*[int(xml_content['recordnum'][index])])
 				else:
 					words_dict[word] = fdist[word]*[int(xml_content['recordnum'][index])]
-		logging.info('FINALIZADO: contagem de ocorrência das palavras nos documentos em '+str(time.time()-start_time)+' s')
+		logging.info('FINALIZADO: contagem de ocorrência das palavras nos documentos em '+str(time.time()-start_time))
 		return words_dict
 
 	def create_csv_words(self, csv_file, words_content):
@@ -152,8 +155,8 @@ class ListGenerator:
 	  	Reads all files and generate a list with words 
 	  	and frequency in each document contained in read_files
 	  """
-	  read_files, write_file = self.read_config_file_xml()
+	  apply_stemmer, read_files, write_file = self.read_config_file_xml()
 	  content = self.read_xml_files(read_files)
-	  words_content = self.get_words_doc(content)
+	  words_content = self.get_words_doc(content, apply_stemmer)
 	  self.create_csv_words(write_file, words_content)
 	  logging.info('FINALIZADO: MÓDULO GERADOR DE LISTA INVERTIDA')

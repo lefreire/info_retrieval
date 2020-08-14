@@ -181,4 +181,6 @@ class Indexer:
 		tf = self.calculate_tf_term(content)
 		res = self.calculate_tf_idf(tf, idf)
 		self.write_output_file(output_path, res)
+		return content, idf, tf, res
 		logging.info('FINALIZADO: MÓDULO INDEXADOR')
+

@@ -1,13 +1,14 @@
 import configparser
 import csv
 import logging
-from xml.dom.minidom import parse
-import xml.dom.minidom
 import nltk
 nltk.download('stopwords')
 nltk.download('punkt')
 from nltk.corpus import stopwords
-from nltk.tokenize import RegexpTokenizer, word_tokenize 
+from nltk.tokenize import RegexpTokenizer
+import xml.dom.minidom
+from xml.dom.minidom import parse
+from stemmer import StemmingWords
 
 
 class QueryProcessor:
@@ -34,7 +35,7 @@ class QueryProcessor:
 		config.read('config/pc.cfg')
 		config.sections()
 		logging.info('FINALIZADO: leitura de arquivo de configuração PC.CFG')
-		return config['INPUT']['LEIA'], config['OUTPUT']['CONSULTAS'], config['OUTPUT']['ESPERADOS']
+		return config.has_section('STEMMER'), config['INPUT']['LEIA'], config['OUTPUT']['CONSULTAS'], config['OUTPUT']['ESPERADOS']
 
 	def tokenize_query(self, query_text):
 		"""
@@ -112,7 +113,7 @@ class QueryProcessor:
 		logging.info('FINALIZADO: leitura do arquivo xml de consultas')
 		return content
 
-	def generate_query_file(self, query_file, xml_name):
+	def generate_query_file(self, query_file, xml_name, apply_stemmer):
 		"""
 			Writing xml file in the query file
 			In the resulting file, it is possible to find all the queries
@@ -136,8 +137,11 @@ class QueryProcessor:
 
 			writer.writeheader()
 			for index in range(0, len(content['QueryNumber'])):
+				query_text = self.tokenize_query(content['QueryText'][index])
+				if apply_stemmer:
+					query_text = StemmingWords().stemming_tokens(query_text)
 				logging.info('Escrevendo consulta '+str(index+1)+'/'+str(len(content['QueryNumber'])))
-				writer.writerow({'QueryNumber': content['QueryNumber'][index], 'QueryText': self.tokenize_query(content['QueryText'][index])})
+				writer.writerow({'QueryNumber': content['QueryNumber'][index], 'QueryText': query_text})
 		logging.info('FINALIZADO: geração de arquivo de consultas')
 
 	def generate_expected_file(self, expected_file, xml_name):
@@ -164,10 +168,13 @@ class QueryProcessor:
 
 			writer.writeheader()
 			for index in range(0, len(content['QueryNumber'])):
+				count_results = 0
 				logging.info('Escrevendo documentos da consulta '+str(index+1)+'/'+str(len(content['QueryNumber'])))
 				for result in content['Records'][index]:
 					writer.writerow({'QueryNumber': content['QueryNumber'][index], 'DocNumber': result[0], 
 									 'DocVotes': result[1]})
+					count_results += 1
+					if count_results == int(content['Results'][index]): break
 
 	def generate_files(self):
 		"""
@@ -175,7 +182,7 @@ class QueryProcessor:
 			Reads all files and generate a file with queries 
 			and a file with expected documents to each query
 		"""
-		xml_file, query_file, expected_file = self.read_config_file()
-		self.generate_query_file(query_file, xml_file)
+		apply_stemmer, xml_file, query_file, expected_file = self.read_config_file()
+		self.generate_query_file(query_file, xml_file, apply_stemmer)
 		self.generate_expected_file(expected_file, xml_file)
 		logging.info('FINALIZADO: MÓDULO PROCESSADOR DE CONSULTAS')

@@ -3,8 +3,8 @@ import csv
 import json
 import logging
 from nltk.tokenize import RegexpTokenizer
-from numpy import linalg as LA
 import time
+from numpy import linalg as LA
 
 
 class QueriesSearch:
@@ -143,11 +143,8 @@ class QueriesSearch:
 	def write_results(self, content, output_path):
 		"""
 			Writing results in a csv file
-			Each row in csv file has query number, retrieved document, 
-			their position in the ranking and the similarity score between document 
-			and query
-			The results in the file only have similarity score >= 0.55
-
+			Each row in csv file has query number, retrieved document and 
+			their position in the ranking 
 
 			Parameters
 			----------
@@ -165,9 +162,8 @@ class QueriesSearch:
 			writer.writeheader()
 			for key in content.keys():
 				logging.info('Escrevendo resultados da consulta '+str(count_queries)+'/'+str(len(content)))
-				for index in range(0, len(content[key])):
-					if content[key][index][1] >= 0.55 : 
-						writer.writerow({'QueryNumber': key, 'RankingDoc': [index+1, content[key][index][0], content[key][index][1]]})
+				for index in range(0, 10):
+					writer.writerow({'QueryNumber': key, 'RankingDoc': [index+1, content[key][index][0], content[key][index][1]]})
 				count_queries += 1
 		logging.info('FINALIZADO: escrita dos resultados no arquivo csv')
 
@@ -180,5 +176,5 @@ class QueriesSearch:
 		queries = self.read_csv_input(queries_path)
 		res = self.calculare_vector_model(content, queries)
 		self.write_results(res, output_path)
+		return content, queries, res
 		logging.info('FINALIZADO: MÓDULO BUSCADOR')
-

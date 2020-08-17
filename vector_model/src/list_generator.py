@@ -124,7 +124,7 @@ class ListGenerator:
 		logging.info('FINALIZADO: contagem de ocorrência das palavras nos documentos em '+str(time.time()-start_time))
 		return words_dict
 
-	def create_csv_words(self, csv_file, words_content):
+	def create_csv_words(self, apply_stemmer, csv_file, words_content):
 		"""
 			Creating csv file in path csv_file with content equals words_content
 
@@ -138,6 +138,12 @@ class ListGenerator:
 			csv_file: file with headers [WORD, DOCS]
 		"""
 		logging.info('INICIANDO: criação de arquivo csv com lista invertida')
+	
+		if apply_stemmer:
+			csv_file = csv_file.split(".")[0] + "_stemmer." + csv_file.split(".")[1]
+		else:
+			csv_file = csv_file.split(".")[0] + "_nostemmer." + csv_file.split(".")[1]
+
 		with open(csv_file, 'w', newline='') as csvfile:
 			writer = csv.DictWriter(csvfile, fieldnames=['WORD', 'DOCS'])
 			writer.writeheader()
@@ -158,5 +164,5 @@ class ListGenerator:
 	  apply_stemmer, read_files, write_file = self.read_config_file_xml()
 	  content = self.read_xml_files(read_files)
 	  words_content = self.get_words_doc(content, apply_stemmer)
-	  self.create_csv_words(write_file, words_content)
+	  self.create_csv_words(apply_stemmer, write_file, words_content)
 	  logging.info('FINALIZADO: MÓDULO GERADOR DE LISTA INVERTIDA')

@@ -30,8 +30,16 @@ class QueriesSearch:
 		config = configparser.ConfigParser()
 		config.read('config/busca.cfg')
 		config.sections()
+		if config.has_section('STEMMER'):
+				input_model = config['INPUT']['MODELO'].split(".")[0] + "_stemmer."+ config['INPUT']['MODELO'].split(".")[1]
+				input_query = config['INPUT']['CONSULTAS'].split(".")[0] + "_stemmer."+ config['INPUT']['CONSULTAS'].split(".")[1]
+				output_file = config['OUTPUT']['RESULTADOS'].split(".")[0] + "_stemmer."+ config['OUTPUT']['RESULTADOS'].split(".")[1]
+		else:
+			input_model = config['INPUT']['MODELO'].split(".")[0] + "_nostemmer."+ config['INPUT']['MODELO'].split(".")[1]
+			input_query = config['INPUT']['CONSULTAS'].split(".")[0] + "_nostemmer."+ config['INPUT']['CONSULTAS'].split(".")[1]
+			output_file = config['OUTPUT']['RESULTADOS'].split(".")[0] + "_nostemmer."+ config['OUTPUT']['RESULTADOS'].split(".")[1]
 		logging.info('FINALIZADO: leitura do arquivo de configuração BUSCA.CFG')
-		return config['INPUT']['MODELO'], config['INPUT']['CONSULTAS'], config['OUTPUT']['RESULTADOS']
+		return input_model, input_query, output_file
 
 	def read_csv_input(self, file_path):
 		"""
@@ -162,8 +170,14 @@ class QueriesSearch:
 			writer.writeheader()
 			for key in content.keys():
 				logging.info('Escrevendo resultados da consulta '+str(count_queries)+'/'+str(len(content)))
-				for index in range(0, 10):
-					writer.writerow({'QueryNumber': key, 'RankingDoc': [index+1, content[key][index][0], content[key][index][1]]})
+				count_docs = 0
+				for index in range(0, len(content[key])):
+					if content[key][index][1] >= 0.55 : 
+						writer.writerow({'QueryNumber': key, 'RankingDoc': [index+1, int(content[key][index][0]), content[key][index][1]]})
+						count_docs += 1
+				if count_docs < 10:
+					for index in range(0, 10):
+						writer.writerow({'QueryNumber': key, 'RankingDoc': [index+1, int(content[key][index][0]), content[key][index][1]]})
 				count_queries += 1
 		logging.info('FINALIZADO: escrita dos resultados no arquivo csv')
 
@@ -176,5 +190,5 @@ class QueriesSearch:
 		queries = self.read_csv_input(queries_path)
 		res = self.calculare_vector_model(content, queries)
 		self.write_results(res, output_path)
-		return content, queries, res
 		logging.info('FINALIZADO: MÓDULO BUSCADOR')
+

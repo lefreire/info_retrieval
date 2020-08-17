@@ -27,8 +27,14 @@ class Indexer:
 		config = configparser.ConfigParser()
 		config.read('config/index.cfg')
 		config.sections()
+		if config.has_section('STEMMER'):
+			input_file = config['INPUT']['LEIA'].split(".")[0] + "_stemmer."+ config['INPUT']['LEIA'].split(".")[1]
+			output_file = config['OUTPUT']['ESCREVA'].split(".")[0] + "_stemmer."+ config['OUTPUT']['ESCREVA'].split(".")[1]
+		else:
+			input_file = config['INPUT']['LEIA'].split(".")[0] + "_nostemmer."+ config['INPUT']['LEIA'].split(".")[1]
+			output_file = config['OUTPUT']['ESCREVA'].split(".")[0] + "_nostemmer."+ config['OUTPUT']['ESCREVA'].split(".")[1]
 		logging.info('FINALIZADO: leitura do arquivo de configuração INDEX.CFG')
-		return config['INPUT']['LEIA'], config['OUTPUT']['ESCREVA']
+		return input_file, output_file
 
 	def calculate_tf_term(self, content):
 		"""	
@@ -181,6 +187,5 @@ class Indexer:
 		tf = self.calculate_tf_term(content)
 		res = self.calculate_tf_idf(tf, idf)
 		self.write_output_file(output_path, res)
-		return content, idf, tf, res
 		logging.info('FINALIZADO: MÓDULO INDEXADOR')
 

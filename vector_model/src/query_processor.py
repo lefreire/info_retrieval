@@ -130,6 +130,10 @@ class QueryProcessor:
 		logging.info('INICIANDO: geração de arquivo de consultas')
 
 		content = self.read_xml(xml_name)
+		if apply_stemmer:
+				query_file = query_file.split(".")[0] + "_stemmer." + query_file.split(".")[1]
+		else:
+			query_file = query_file.split(".")[0] + "_nostemmer." + query_file.split(".")[1]
 
 		with open(query_file, 'w', newline='') as csvfile:
 			fieldnames = ['QueryNumber', 'QueryText']

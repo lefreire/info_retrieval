@@ -26,6 +26,7 @@ class QueryProcessor:
 
 			Returns
 			-------
+			has_stemmer: bool
 			path_input_file: string
 			path_queries_file: string
 			path_expected_file: string
@@ -122,12 +123,16 @@ class QueryProcessor:
 			----------
 			query_file: string with file path 
 			xml_name: string with file path
+			apply_stemmer: bool indicating if the stemmer will be applied or not
 
 			Returns
 			-------
 			csv_file: file with headers [QueryNumber, QueryText]
 		"""
-		logging.info('INICIANDO: geração de arquivo de consultas')
+		if apply_stemmer:
+			logging.info('INICIANDO: geração de arquivo de consultas com stemmer')
+		else:
+			logging.info('INICIANDO: geração de arquivo de consultas sem stemmer')
 
 		content = self.read_xml(xml_name)
 		if apply_stemmer:

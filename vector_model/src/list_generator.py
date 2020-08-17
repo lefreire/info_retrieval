@@ -29,6 +29,7 @@ class ListGenerator:
 
 			Returns
 			-------
+			has_stemmer: bool
 			path_input_file: list of strings
 			path_output_file: string
 		"""
@@ -50,7 +51,6 @@ class ListGenerator:
 
 			Returns
 			-------
-
 			content: dictionary with keys recordnum, abstract
 		"""	
 		logging.info('INICIANDO: leitura de arquivos xml')
@@ -101,12 +101,17 @@ class ListGenerator:
 			Parameters
 			----------
 			xml_content: dictionary with keys recordnum and abstract
+			apply_stemmer: bool indicating if the stemmer will be applied or not
 
 			Returns
 			-------
 			words_dict: dictionary with keys = words in the text
 		"""
-		logging.info('INICIANDO: contagem de ocorrência das palavras nos documentos')
+		if apply_stemmer:
+			logging.info('INICIANDO: contagem de ocorrência das palavras nos documentos com stemmer')
+		else:
+			logging.info('INICIANDO: contagem de ocorrência das palavras nos documentos sem stemmer')
+
 		start_time = time.time()
 		xml_content['new_abstract'] = []
 		words_dict = {}
@@ -130,6 +135,7 @@ class ListGenerator:
 
 			Parameters
 			----------
+			apply_stemmer: bool indicating if the stemmer will be applied or not
 			csv_file: string
 			words_content: dictionary
 

@@ -1,8 +1,11 @@
+import logging
+logging.basicConfig(level=logging.INFO)
 from diagram import Diagram
 from metrics import Metrics
 from results_file import *
 
 
+logging.info('INICIANDO: CÁLCULO DAS MÉTRICAS E CONSTRUÇÃO DOS DIAGRAMAS E RELATÓRIO')
 metrics = Metrics("result/resultados_stemmer.csv")
 eleven_points, f1, prec5, prec10, r_prec, mean_ap, mrr, dcg, avg_dcg, ndcg  = metrics.all_metrics()
 
@@ -58,3 +61,5 @@ diag.diagram_ndcg(ndcg_no, "ndcg-nostemmer-13.png")
 result_file(ndcg_no, ['QueryNumber', 'nDCG'], "ndcg-nostemmer-13.csv")
 
 report(eleven_points, f1, prec5, prec10, r_prec, mean_ap, mrr, dcg, ndcg, eleven_points_no, f1_no, prec5_no, prec10_no, r_prec_no, mean_ap_no, mrr_no, dcg_no, ndcg_no, diff_precision)
+logging.info('FINALIZADO: CÁLCULO DAS MÉTRICAS E CONSTRUÇÃO DOS DIAGRAMAS E RELATÓRIO')
+
